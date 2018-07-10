@@ -17,7 +17,8 @@ func (s *UserActivityService) ProcessTransaction(t *Transaction) *TransactionRes
 	userActivity := s.repository.Get(t.CustomerID)
 	result, err := userActivity.AddTransaction(t)
 	if err != nil {
-		fmt.Printf("Failed to add transaction. Reason: %s", err)
+		fmt.Printf("Failed to add transaction. Reason: %s\n", err)
+		return nil
 	}
 	if result.Accepted {
 		s.repository.Save(userActivity)

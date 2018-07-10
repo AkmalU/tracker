@@ -22,14 +22,20 @@ func main() {
 
 	service := transactions.NewService(transactions.NewInMemoryRepo())
 	outLines := [][]byte{}
-	for _, inLine := range inLines {
+	for _, inLineStr := range inLines {
+		inLine := []byte(inLineStr)
+
 		transaction := &transactions.Transaction{}
 		err := json.Unmarshal(inLine, transaction)
 		if err != nil {
-			log.Fatal(err)
+			fmt.Printf("boo\n%s\n\n------\n%+v", string(inLine), err)
+			os.Exit(-1)
 		}
 
 		result := service.ProcessTransaction(transaction)
+		if result == nil {
+			continue
+		}
 		outLine, err := json.Marshal(result)
 		if err != nil {
 			log.Fatal(err)
@@ -43,17 +49,17 @@ func main() {
 	}
 }
 
-func readLines(path string) ([][]byte, error) {
+func readLines(path string) ([]string, error) {
 	file, err := os.Open(path)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
-	var lines [][]byte
+	var lines []string
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		lines = append(lines, scanner.Bytes())
+		lines = append(lines, scanner.Text())
 	}
 	return lines, scanner.Err()
 }

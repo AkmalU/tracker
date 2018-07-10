@@ -44,10 +44,10 @@ func (ua *UserActivity) AddTransaction(t *Transaction) (*TransactionResult, erro
 	if ua.DailyTransactions == _MaxNumberOfDailyTransactions {
 		return result, nil
 	}
-	if ua.DailyAmount.Add(t.LoadAmount).Compare(_MaxDailyAmount) == 1 {
+	if ua.DailyAmount.Sum(t.LoadAmount).Compare(_MaxDailyAmount) == 1 {
 		return result, nil
 	}
-	if ua.WeeklyAmount.Add(t.LoadAmount).Compare(_MaxWeeklyAmount) == 1 {
+	if ua.WeeklyAmount.Sum(t.LoadAmount).Compare(_MaxWeeklyAmount) == 1 {
 		return result, nil
 	}
 

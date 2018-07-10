@@ -63,6 +63,15 @@ func (a *Amount) Add(other *Amount) *Amount {
 	return a
 }
 
+// Sum two values and return new instance
+func (a *Amount) Sum(other *Amount) *Amount {
+	sum := NewAmount()
+	sum.Currency = a.Currency
+	sum.Value.Add(a.Value, other.Value)
+	sum.Raw = sum.toString()
+	return sum
+}
+
 // Compare the values of two amounts
 func (a *Amount) Compare(other *Amount) int {
 	return a.Value.Cmp(other.Value)

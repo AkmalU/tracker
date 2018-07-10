@@ -23,22 +23,22 @@ type UserActivity struct {
 
 // AddTransaction adds a new transaction to user's activity
 func (ua *UserActivity) AddTransaction(t *Transaction) (*TransactionResult, error) {
-	if _, ok := ua.Ledger[t.ID]; ok {
-		return nil, fmt.Errorf("Duplicate transaction: %s", t.ID)
-	}
-
 	result := &TransactionResult{
 		ID:         t.ID,
 		CustomerID: t.CustomerID,
 		Accepted:   false,
 	}
 
+	if _, ok := ua.Ledger[t.ID]; ok {
+		return nil, fmt.Errorf("Duplicate transaction: %s", t.ID)
+	}
+	ua.Ledger[t.ID] = t
 	if !isSameDay(&ua.Updated, &t.Time) {
-		ua.DailyAmount = amounts.NewAmount()
+		ua.DailyAmount = amounts.Parse("$0")
 		ua.DailyTransactions = 0
 	}
 	if !isSameWeek(&ua.Updated, &t.Time) {
-		ua.WeeklyAmount = amounts.NewAmount()
+		ua.WeeklyAmount = amounts.Parse("$0")
 	}
 
 	if ua.DailyTransactions == _MaxNumberOfDailyTransactions {
@@ -50,12 +50,10 @@ func (ua *UserActivity) AddTransaction(t *Transaction) (*TransactionResult, erro
 	if ua.WeeklyAmount.Sum(t.LoadAmount).Compare(_MaxWeeklyAmount) == 1 {
 		return result, nil
 	}
-
 	ua.Updated = t.Time
 	ua.DailyAmount = ua.DailyAmount.Add(t.LoadAmount)
 	ua.WeeklyAmount = ua.WeeklyAmount.Add(t.LoadAmount)
 	ua.DailyTransactions++
-	ua.Ledger[t.ID] = t
 
 	result.Accepted = true
 	return result, nil
@@ -72,7 +70,8 @@ func isSameDay(this *time.Time, other *time.Time) bool {
 func isSameWeek(this *time.Time, other *time.Time) bool {
 	result := true
 	thisYear, thisWeek := this.ISOWeek()
-	otherYear, otherWeek := this.ISOWeek()
+	otherYear, otherWeek := other.ISOWeek()
+
 	result = result && thisYear == otherYear
 	result = result && thisWeek == otherWeek
 	return result

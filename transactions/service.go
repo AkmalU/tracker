@@ -20,8 +20,6 @@ func (s *UserActivityService) ProcessTransaction(t *Transaction) *TransactionRes
 		fmt.Printf("Failed to add transaction. Reason: %s\n", err)
 		return nil
 	}
-	if result.Accepted {
-		s.repository.Save(userActivity)
-	}
+	s.repository.Save(userActivity)
 	return result
 }
